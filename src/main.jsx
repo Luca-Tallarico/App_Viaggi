@@ -10,5 +10,6 @@ import '@fontsource/playfair-display/latin-400.css';
 import '@fontsource/playfair-display/latin-400-italic.css';
 import 'leaflet/dist/leaflet.css';
 import './styles.css';
+import './globe.css';
 
 createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);

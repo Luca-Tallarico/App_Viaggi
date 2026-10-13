@@ -15,6 +15,7 @@ test.beforeEach(async ({page})=>{
   await page.route('https://restcountries.com/**',route=>route.fulfill({json:{languages:{jpn:'Japanese'},currencies:{JPY:{name:'Japanese yen'}}}}));
   await page.route('https://it.wikipedia.org/**',route=>route.fulfill({json:{query:{pages:{}}}}));
   await page.goto('/');
+  await page.getByRole('navigation').getByRole('button',{name:/Le nostre mete/}).click();
 });
 
 test('add, edit, persist and remove a trip',async ({page})=>{
@@ -22,17 +23,19 @@ test('add, edit, persist and remove a trip',async ({page})=>{
   await page.getByRole('button',{name:'Aggiungi una meta',exact:true}).click();
   const dialog=page.getByRole('dialog');
   await dialog.getByRole('button',{name:'Parigi Francia'}).click();
+  await dialog.getByRole('button',{name:/Date e dettagli/}).click();
   await dialog.getByLabel('Partenza',{exact:true}).fill(futureStart);
   await dialog.getByLabel('Ritorno',{exact:true}).fill(futureReturn);
-  await dialog.getByLabel('A che punto siamo?').selectOption('planned');
-  await dialog.getByLabel(/Un pensiero/).fill('Un weekend tutto per noi.');
-  await dialog.getByRole('button',{name:'Aggiungi alla nostra lista'}).click();
+  await dialog.getByLabel('Stato del viaggio').selectOption('planned');
+  await dialog.getByRole('textbox',{name:'Note',exact:true}).fill('Un weekend tutto per noi.');
+  await dialog.getByRole('button',{name:'Aggiungi ai viaggi'}).click();
   await expect(page.locator('.trip-card')).toHaveCount(4);
   await page.reload();
+  await page.getByRole('navigation').getByRole('button',{name:/Le nostre mete/}).click();
   const card=page.locator('.trip-card').filter({has:page.getByRole('heading',{name:'Parigi',exact:true})});
   await expect(card).toContainText('Un weekend tutto per noi.');
   await card.getByRole('button',{name:'Modifica Parigi'}).click();
-  await dialog.getByLabel(/Un pensiero/).fill('Il Louvre e un caffè.');
+  await dialog.getByRole('textbox',{name:'Note',exact:true}).fill('Il Louvre e un caffè.');
   await dialog.getByRole('button',{name:'Salva modifiche'}).click();
   await expect(card).toContainText('Il Louvre e un caffè.');
   await card.getByRole('button',{name:'Rimuovi Parigi'}).click();
@@ -54,7 +57,7 @@ test('filters and search compose, and the empty state restores them',async ({pag
 test('planned trips require valid dates',async ({page})=>{
   await page.getByRole('button',{name:'Modifica Lisbona'}).click();
   const dialog=page.getByRole('dialog');
-  await dialog.getByLabel('A che punto siamo?').selectOption('planned');
+  await dialog.getByLabel('Stato del viaggio').selectOption('planned');
   await dialog.getByRole('button',{name:'Salva modifiche'}).click();
   await expect(dialog.getByRole('alert')).toContainText('scegli partenza e ritorno');
   await dialog.getByLabel('Partenza',{exact:true}).fill(futureStart);
@@ -68,7 +71,7 @@ test('calendar displays actual trip dates and opens the trip',async ({page})=>{
   const dialog=page.getByRole('dialog');
   await dialog.getByLabel('Partenza',{exact:true}).fill(futureStart);
   await dialog.getByLabel('Ritorno',{exact:true}).fill(futureEnd);
-  await dialog.getByLabel('A che punto siamo?').selectOption('planned');
+  await dialog.getByLabel('Stato del viaggio').selectOption('planned');
   await dialog.getByRole('button',{name:'Salva modifiche'}).click();
   await page.getByRole('navigation').getByRole('button',{name:'Calendario'}).click();
   await expect(page.locator('.calendar-header')).toContainText(futureDate.toLocaleDateString('it-IT',{month:'long',year:'numeric'}));
@@ -84,17 +87,18 @@ test('calendar displays actual trip dates and opens the trip',async ({page})=>{
 
 test('worldwide search adds a geocoded destination and persists it',async ({page})=>{
   await page.route('https://geocoding-api.open-meteo.com/**',route=>route.fulfill({json:{results:[{id:1850147,name:'Tokyo',country:'Giappone',country_code:'JP',latitude:35.6895,longitude:139.6917,timezone:'Asia/Tokyo'}]}}));
-  await page.getByRole('navigation').getByRole('button',{name:'Esplora il mondo'}).click();
+  await page.getByRole('navigation').getByRole('button',{name:'Mappa',exact:true}).click();
   await page.getByLabel('Cerca una località sulla mappa').fill('Tokyo');
-  await page.getByRole('button',{name:'Cerca nel mondo'}).click();
+  await page.getByRole('button',{name:'Cerca',exact:true}).click();
   await page.locator('.map-search-results').getByRole('button',{name:/Tokyo/}).click();
   await expect(page.locator('.map-discovery')).toContainText('Tokyo');
-  await expect(page.locator('.leaflet-marker-icon')).toHaveCount(7);
-  await page.locator('.map-discovery').getByRole('button',{name:'Aggiungi alla lista'}).click();
-  await page.getByRole('dialog').getByRole('button',{name:'Aggiungi alla nostra lista'}).click();
+  await expect(page.locator('.leaflet-marker-icon')).toHaveCount(34);
+  await page.locator('.map-discovery').getByRole('button',{name:'Aggiungi ai viaggi'}).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await page.getByRole('navigation').getByRole('button',{name:/Le nostre mete/}).click();
   await expect(page.locator('.trip-card')).toHaveCount(4);
   await page.reload();
+  await page.getByRole('navigation').getByRole('button',{name:/Le nostre mete/}).click();
   await expect(page.locator('.card-title')).toContainText(['Tokyo','Lisbona','Kyoto','Copenaghen']);
 });
 
@@ -125,7 +129,7 @@ test('forecast and public holidays render provider responses',async ({page})=>{
 
 test('mobile navigation, trip sheet and layouts fit the viewport',async ({page})=>{
   await page.setViewportSize({width:390,height:844});
-  await expect(page.locator('h1')).toContainText('Il mondo');
+  await expect(page.locator('h1')).toContainText('Le nostre mete');
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await page.getByRole('button',{name:'Apri menu'}).click();
   await page.getByRole('navigation').getByRole('button',{name:'Calendario'}).click();

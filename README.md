@@ -1,14 +1,14 @@
 # Duepassi
 
-Un’app in italiano per organizzare i viaggi in coppia, con stile minimale bianco, nero e beige. Creata con React, Vite e Leaflet.
+Un’app in italiano per organizzare i viaggi in coppia, con stile minimale bianco, nero e beige. Creata con React, Vite, D3 Geo e Leaflet.
 
 ## Aprire l’app senza installazione
 
-Scaricare [`download/Duepassi.zip`](https://github.com/Luca-Tallarico/App_Viaggi/blob/main/download/Duepassi.zip) usando **Download raw file** su GitHub. Estrarre l’archivio e aprire `Duepassi.html` con Chrome, Edge, Firefox o Safari. È una copia autonoma dell’app con foto e font inclusi; le funzioni online richiedono Internet. Non serve Node.js. I viaggi sono salvati nel browser su quel dispositivo.
+Scaricare [`download/Duepassi.zip`](https://github.com/Luca-Tallarico/App_Viaggi/blob/main/download/Duepassi.zip) usando **Download raw file** su GitHub. Estrarre l’archivio e aprire `Duepassi.html` con Chrome, Edge, Firefox o Safari. È una copia autonoma dell’app con globo, foto e font inclusi; le funzioni online richiedono Internet. Non serve Node.js. I viaggi sono salvati nel browser su quel dispositivo.
 
 Foto di Lisbona: [Ana Correia 28, CC BY-SA 4.0](https://commons.wikimedia.org/wiki/File:Baixa_De_Lisboa.jpg). Altre foto illustrative: Unsplash.
 
-Lo ZIP è una copia dell’app al 13 ottobre 2026. Le modifiche future ai sorgenti non lo aggiornano automaticamente.
+Lo ZIP è una copia dell’app al 13 ottobre 2026. Dopo le modifiche ai sorgenti, eseguire `npm run export:html` per rigenerarlo. Il comando richiede curl e scarica le foto via HTTPS solo se non sono già nella cache locale ignorata da Git.
 
 ## Avvio
 
@@ -27,10 +27,12 @@ npm run build
 npm run preview -- --port 4173
 ```
 
-La cartella `dist` è pubblicabile su un hosting statico. Non sono necessarie chiavi API o un backend per questa versione. Ogni task cloud dispone già di un ambiente isolato: usare il checkout esistente, senza creare worktree salvo richiesta esplicita.
+La cartella `dist` è pubblicabile su un hosting statico. Per aggiornare il file autonomo e lo ZIP eseguire `npm run export:html`; gli artefatti sono creati in `download`. Non sono necessarie chiavi API o un backend per questa versione. Ogni task cloud dispone già di un ambiente isolato: usare il checkout esistente, senza creare worktree salvo richiesta esplicita.
 
 ## Funzioni
 
+- Home con mappamondo a proiezione ortografica ruotabile con mouse, touch e tastiera. Geografia Natural Earth incorporata, 34 località iniziali, zoom, rotazione automatica facoltativa e filtri per continente. Il globo funziona offline e non richiede WebGL.
+- Aggiunta rapida dalla località selezionata con un clic, evitando duplicati accidentali. Date e note sono facoltative nel modulo semplificato.
 - Lista delle mete con ricerca, filtri per continente e stato, ordinamento, aggiunta, modifica e rimozione con conferma.
 - Calendario mensile con viaggi distribuiti su tutte le date, anche a cavallo di mesi e anni. Le mete senza date rimangono nella wishlist.
 - Mappa mondiale OpenStreetMap con zoom, selezione delle località e ricerca di città in tutto il mondo tramite Open-Meteo Geocoding.
@@ -75,6 +77,6 @@ npm run build
 npm run test:e2e
 ```
 
-I test unitari verificano date, intervalli, link e conversione delle località. Gli 8 test Playwright verificano CRUD, persistenza, filtri, calendario, ricerca mondiale, dati meteo/festività, indisponibilità dei servizi e layout mobile. Le API esterne sono simulate per rendere le verifiche ripetibili e indipendenti dal traffico di rete.
+I test unitari verificano date, intervalli, link e conversione delle località. I 13 test Playwright verificano CRUD, persistenza, filtri, calendario, ricerca mondiale, dati meteo/festività, indisponibilità dei servizi e layout mobile, rotazione con mouse e touch, zoom, navigazione del globo da tastiera e aggiunta in un clic. Le API esterne sono simulate per rendere le verifiche ripetibili e indipendenti dal traffico di rete.
 
 I test nel cloud usano Chromium in `/usr/bin/chromium`. Su un’altra macchina impostare `CHROMIUM_PATH` al percorso di un Chromium installato. Il server di sviluppo viene avviato automaticamente se non è già attivo. Nessun test richiede credenziali.
